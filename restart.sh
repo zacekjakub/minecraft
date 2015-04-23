@@ -16,7 +16,8 @@ xms="1024"              # like 1042M
 xmx="2048"              # like 2048M
 mc_file=
 path_to_java=
-
+lockfile=
+whenrestart=
 
 
 
@@ -32,17 +33,17 @@ screen -dmS mc_screen $path_to_java -Xms$xms -Xmx$xmx -jar $mc_file nogui
 
 #running or not
 function isrunning() {
-if [ -f /tmp/mylockFile ] ; then
+if [ -f $lockfile ] ; then
  echo 'Script lock detected, going to recheck'
  thisscriptname=`basename $0`
  countinstances=`ps aux | grep -i $thisscriptname | grep -v "grep" | wc -l`
   if [ "$countinstances" -lt "2" ]
-   rm -f /tmp/mylockFile
-   echo "Because of fail saved lockfile: lockfile removed"
+   rm -f $lockfile
+   echo "Because of fail-saved lockfile: lockfile removed"
   fi
  exit 0;
 else
-  echo 1 > /tmp/mylockFile
+  echo 1 > $lockfile
   echo 'This is first instance of this script running, lock saved'
 fi
 }
@@ -53,13 +54,13 @@ fi
 #Code
 
 
-#If already running, do nothing; if needed, lock remove
+#If already running, do nothing; if needed, remove lock
 isrunning
 
 
 javapid=$(pgrep java)
 howlongruns=$(ps -eo pid,etime | grep $javapid | awk -F' ' '{print $2}')
-whenrestart=11
+
 
 hours=$(echo $howlongruns | awk -F':' '{print $1}')
 echo $hours
